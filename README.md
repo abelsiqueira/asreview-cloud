@@ -112,6 +112,14 @@ The `HOW_MUCH_MEMORY` argument is how much memory.
 >
 > If you are on SURF, you found these values when creating the machine.
 
+If you are using a multi-node minikube setup, also run the following:
+
+```bash
+minikube addons disable storage-provisioner
+kubectl delete storageclasses.storage.k8s.io standard
+kubectl apply -f kubevirt-hostpath-provisioner.yml
+```
+
 ## Clone this repo
 
 If you haven't already, clone this repo and enter it's folder:
@@ -457,3 +465,15 @@ kubectl -n asreview-cloud  exec rabbitmq-server-0 -- rabbitmqctl delete_queue as
 ```
 
 You should see the workers go back to "Running" state.
+
+### Every pod is Running, Tasker sent the messages, but both Tasker and Workers are stuck waiting
+
+Check the `rabbitmq-server-0` logs.
+If you find "disk resource limit alarm set on node", then you need more disk space.
+One quick workaround is to disable the alarm by issuing
+
+```bash
+kubectl -n asreview-cloud exec rabbitmq-server-0 -- rabbitmqctl set_disk_free_limit 0
+```
+
+Of course, if you really have no space left on decide, it will error.
